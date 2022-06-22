@@ -26,5 +26,6 @@ namespace Business.Concrete
         {
             return _categoryDal.Get(c=>c.CategoryID==categoryId);
         }
+      
     }
 }
