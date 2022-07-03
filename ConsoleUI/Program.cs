@@ -36,7 +36,7 @@ namespace ConsoleUI
             }
             else
             {
-                Console.WriteLine(result.Massage);
+                Console.WriteLine(result.Message);
             }
 
         }

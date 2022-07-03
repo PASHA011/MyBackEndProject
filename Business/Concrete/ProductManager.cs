@@ -1,4 +1,5 @@
 ﻿using Business.Abstract;
+using Business.BusinessAspect.Autofac;
 using Business.CCS;
 using Business.Constants;
 using Business.ValidationRules.FluentValidation;
@@ -28,6 +29,7 @@ namespace Business.Concrete
             _productDal = productDal;
             _CategoryService = categoryService;
         }
+        [SecuredOperation("product.add,admin")]
         [ValidationAspect(typeof(ProductValidator))]
         public IResult Add(Product product)
         {
@@ -78,7 +80,7 @@ namespace Business.Concrete
         private IResult CategoriesCountControl(int categoryId)
         {
             var result = _productDal.GetAll(p => p.CategoryID == categoryId).Count;
-            if (result >= 15)
+            if (result >= 20)
             {
                 return new ErrorResult(Messages.ProductCountOfCategryError);
             }
