@@ -3,6 +3,7 @@ using Business.BusinessAspect.Autofac;
 using Business.CCS;
 using Business.Constants;
 using Business.ValidationRules.FluentValidation;
+using Core.Aspects.Autofac.Caching;
 using Core.Aspects.Autofac.Validation;
 using Core.CrossCuttingConserns.Validation;
 using Core.Utilities.Business;
@@ -14,6 +15,7 @@ using Entities.CTOs;
 using FluentValidation;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Business.Concrete
@@ -31,6 +33,8 @@ namespace Business.Concrete
         }
         [SecuredOperation("product.add,admin")]
         [ValidationAspect(typeof(ProductValidator))]
+        [CacheRemoveAspect("")]
+        [TransactionScopeAspect()]
         public IResult Add(Product product)
         {
             IResult result = BusinessRules.Run
@@ -46,7 +50,7 @@ namespace Business.Concrete
             _productDal.Add(product);
             return new SuccessResult(Messages.ProductAdded);    
         }
-
+        [CacheAspect]
         public IDataResult<List<Product>> GetAll()
         {
             if (DateTime.Now.Hour == 4)
@@ -61,6 +65,7 @@ namespace Business.Concrete
         {
             return new SuccessDataResult<List<Product>>(_productDal.GetAll(p => p.CategoryID == id));
         }
+        [CacheAspect]
 
         public IDataResult<Product> GetById(int productId)
         {
@@ -80,7 +85,7 @@ namespace Business.Concrete
         private IResult CategoriesCountControl(int categoryId)
         {
             var result = _productDal.GetAll(p => p.CategoryID == categoryId).Count;
-            if (result >= 20)
+            if (result >= 200)
             {
                 return new ErrorResult(Messages.ProductCountOfCategryError);
             }
@@ -88,12 +93,12 @@ namespace Business.Concrete
         }
         private IResult ProductNameControl(string productName)
         {
-            var result = _productDal.GetAll(p => p.ProductName == productName);
-            if (result == null)
+            var result = _productDal.GetAll(p => p.ProductName == productName).Any();
+            if (result)
             {
-                return new SuccessResult();
+            return new ErrorResult(Messages.ProductNameOfError);
             }
-            return new ErrorResult(Messages.ProductCountOfCategryError);
+                return new SuccessResult();
         }
         private IResult CategoryLimitControl()
         {
@@ -103,6 +108,11 @@ namespace Business.Concrete
             return new ErrorResult(Messages.CategoriseCountOfCategryError);
             }
                 return new SuccessResult();
+        }
+        [TransactionScopeAspect]
+        public IResult AddTransactionalTest(Product product)
+        {
+            throw new NotImplementedException();
         }
     }
 }

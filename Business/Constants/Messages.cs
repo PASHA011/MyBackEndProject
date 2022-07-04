@@ -25,5 +25,7 @@ namespace Business.Constants
 
         public static string UserNotFound = "Kullanıcı bulunamadı";
         public static string UserRegistered = "kayıt oldu";
+
+        public static string ProductNameOfError = "bu ürün ismi geçersiz";
     }
 }
